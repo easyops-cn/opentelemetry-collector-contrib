@@ -73,7 +73,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordProcessMemoryUsageDataPoint(ts, 1)
+			mb.RecordProcessMemoryUsageDataPoint(ts, 1, pcommon.NewMap())
 
 			allMetricsCount++
 			mb.RecordProcessMemoryUtilizationDataPoint(ts, 1)
@@ -190,7 +190,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["process.cpu.time"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "Total CPU seconds broken down by different states.", ms.At(i).Description())
+					assert.Equal(t, "Total CPU seconds contains different states.", ms.At(i).Description())
 					assert.Equal(t, "s", ms.At(i).Unit())
 					assert.Equal(t, true, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -354,4 +354,49 @@ func TestMetricsBuilder(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestMetricsBuilder_RecordTotalProcessCPUTimeDataPoint(t *testing.T) {
+	start := pcommon.Timestamp(1_000_000_000)
+	ts := pcommon.Timestamp(1_000_001_000)
+	observedZapCore, _ := observer.New(zap.WarnLevel)
+	settings := receivertest.NewNopCreateSettings()
+	settings.Logger = zap.New(observedZapCore)
+	mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, "default"), settings, WithStartTime(start))
+
+	val := 12.34
+	labels := pcommon.NewMap()
+	labels.FromRaw(map[string]any{
+		"key1": "value1", "key2": "value2",
+	})
+
+	mb.RecordTotalProcessCPUTimeDataPoint(ts, val, labels)
+
+	m := mb.metricProcessCPUTime
+	dp := m.data.Sum().DataPoints().At(0)
+
+	if dp.StartTimestamp() != mb.startTime {
+		t.Errorf("Start timestamp is not set correctly")
+	}
+
+	if dp.Timestamp() != ts {
+		t.Errorf("Timestamp is not set correctly")
+	}
+
+	if dp.DoubleValue() != val {
+		t.Errorf("Double value is not set correctly")
+	}
+
+	if dp.Attributes().Len() != labels.Len() {
+		t.Errorf("Attributes are not set correctly")
+	}
+
+	labels.Range(func(k string, want pcommon.Value) bool {
+		got, ok := dp.Attributes().Get(k)
+		if !ok || got.AsString() != want.AsString() {
+			t.Errorf("Attribute `%s` is not set correctly", k)
+			return false
+		}
+		return true
+	})
 }
