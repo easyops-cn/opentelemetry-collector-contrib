@@ -40,7 +40,7 @@ type Config struct {
 	ScrapeProcessDelay time.Duration `mapstructure:"scrape_process_delay"`
 
 	// 自定义process_cpu_time
-	CustomCpuTime bool `mapstructure:"custom_cpu_time"`
+	CustomCPUTime bool `mapstructure:"custom_cpu_time"`
 	// 自定义process_memory_usage
 	CustomMemoryUsage bool `mapstructure:"custom_memory_usage"`
 }

@@ -278,7 +278,7 @@ func (s *scraper) scrapeAndAppendCPUTimeMetric(now pcommon.Timestamp, md *proces
 		return err
 	}
 
-	if s.config.CustomCpuTime {
+	if s.config.CustomCPUTime {
 		labels := pcommon.NewMap()
 		labels.PutInt(metadata.AttributePid.String(), int64(md.pid))
 		labels.PutStr(metadata.AttributePname.String(), md.executable.name)
