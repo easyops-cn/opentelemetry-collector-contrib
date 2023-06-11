@@ -54,16 +54,16 @@ func TestMetricsBuilder(t *testing.T) {
 			defaultMetricsCount := 0
 			allMetricsCount := 0
 
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordProcessAllCPUTimeDataPoint(ts, 1, 1, "attr-val", "attr-val")
+
 			allMetricsCount++
 			mb.RecordProcessContextSwitchesDataPoint(ts, 1, AttributeContextSwitchType(1))
 
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordProcessCPUTimeDataPoint(ts, 1, AttributeState(1))
-
-			defaultMetricsCount++
-			allMetricsCount++
-			mb.RecordProcessCPUTimeTotalDataPoint(ts, 1)
 
 			allMetricsCount++
 			mb.RecordProcessCPUUtilizationDataPoint(ts, 1, AttributeState(1))
@@ -74,6 +74,10 @@ func TestMetricsBuilder(t *testing.T) {
 
 			allMetricsCount++
 			mb.RecordProcessDiskOperationsDataPoint(ts, 1, AttributeDirection(1))
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordProcessMemoryPhysicalDataPoint(ts, 1, 1, "attr-val", "attr-val")
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -179,6 +183,29 @@ func TestMetricsBuilder(t *testing.T) {
 			validatedMetrics := make(map[string]bool)
 			for i := 0; i < ms.Len(); i++ {
 				switch ms.At(i).Name() {
+				case "process.all.cpu.time":
+					assert.False(t, validatedMetrics["process.all.cpu.time"], "Found a duplicate in the metrics slice: process.all.cpu.time")
+					validatedMetrics["process.all.cpu.time"] = true
+					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
+					assert.Equal(t, "Total CPU seconds contains different states.", ms.At(i).Description())
+					assert.Equal(t, "s", ms.At(i).Unit())
+					assert.Equal(t, true, ms.At(i).Sum().IsMonotonic())
+					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
+					dp := ms.At(i).Sum().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.Equal(t, float64(1), dp.DoubleValue())
+					attrVal, ok := dp.Attributes().Get("pid")
+					assert.True(t, ok)
+					assert.EqualValues(t, 1, attrVal.Int())
+					attrVal, ok = dp.Attributes().Get("pname")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("cwd")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
 				case "process.context_switches":
 					assert.False(t, validatedMetrics["process.context_switches"], "Found a duplicate in the metrics slice: process.context_switches")
 					validatedMetrics["process.context_switches"] = true
@@ -213,20 +240,6 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("state")
 					assert.True(t, ok)
 					assert.Equal(t, "system", attrVal.Str())
-				case "process.cpu.time.total":
-					assert.False(t, validatedMetrics["process.cpu.time.total"], "Found a duplicate in the metrics slice: process.cpu.time.total")
-					validatedMetrics["process.cpu.time.total"] = true
-					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
-					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "Total CPU seconds contains different states.", ms.At(i).Description())
-					assert.Equal(t, "s", ms.At(i).Unit())
-					assert.Equal(t, true, ms.At(i).Sum().IsMonotonic())
-					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
-					dp := ms.At(i).Sum().DataPoints().At(0)
-					assert.Equal(t, start, dp.StartTimestamp())
-					assert.Equal(t, ts, dp.Timestamp())
-					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
-					assert.Equal(t, float64(1), dp.DoubleValue())
 				case "process.cpu.utilization":
 					assert.False(t, validatedMetrics["process.cpu.utilization"], "Found a duplicate in the metrics slice: process.cpu.utilization")
 					validatedMetrics["process.cpu.utilization"] = true
@@ -276,6 +289,29 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("direction")
 					assert.True(t, ok)
 					assert.Equal(t, "read", attrVal.Str())
+				case "process.memory.physical":
+					assert.False(t, validatedMetrics["process.memory.physical"], "Found a duplicate in the metrics slice: process.memory.physical")
+					validatedMetrics["process.memory.physical"] = true
+					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
+					assert.Equal(t, "The amount of physical memory in use.", ms.At(i).Description())
+					assert.Equal(t, "By", ms.At(i).Unit())
+					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
+					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
+					dp := ms.At(i).Sum().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("pid")
+					assert.True(t, ok)
+					assert.EqualValues(t, 1, attrVal.Int())
+					attrVal, ok = dp.Attributes().Get("pname")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("cwd")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
 				case "process.memory.usage":
 					assert.False(t, validatedMetrics["process.memory.usage"], "Found a duplicate in the metrics slice: process.memory.usage")
 					validatedMetrics["process.memory.usage"] = true

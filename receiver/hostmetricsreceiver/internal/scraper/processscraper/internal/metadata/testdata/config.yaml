@@ -1,17 +1,19 @@
 default:
 all_set:
   metrics:
+    process.all.cpu.time:
+      enabled: true
     process.context_switches:
       enabled: true
     process.cpu.time:
-      enabled: true
-    process.cpu.time.total:
       enabled: true
     process.cpu.utilization:
       enabled: true
     process.disk.io:
       enabled: true
     process.disk.operations:
+      enabled: true
+    process.memory.physical:
       enabled: true
     process.memory.usage:
       enabled: true
@@ -46,17 +48,19 @@ all_set:
       enabled: true
 none_set:
   metrics:
+    process.all.cpu.time:
+      enabled: false
     process.context_switches:
       enabled: false
     process.cpu.time:
-      enabled: false
-    process.cpu.time.total:
       enabled: false
     process.cpu.utilization:
       enabled: false
     process.disk.io:
       enabled: false
     process.disk.operations:
+      enabled: false
+    process.memory.physical:
       enabled: false
     process.memory.usage:
       enabled: false

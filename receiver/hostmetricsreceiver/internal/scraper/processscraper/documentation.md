@@ -12,6 +12,22 @@ metrics:
     enabled: false
 ```
 
+### process.all.cpu.time
+
+Total CPU seconds contains different states.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| s | Sum | Double | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| pid | Process identifier (PID). | Any Int |
+| pname | The name of the process executable. On Linux based systems, can be set to the Name in proc/[pid]/status. On Windows, can be set to the base name of GetProcessImageFileNameW. | Any Str |
+| cwd | The cwd of the process executable. | Any Str |
+
 ### process.cpu.time
 
 Total CPU seconds broken down by different states.
@@ -26,14 +42,6 @@ Total CPU seconds broken down by different states.
 | ---- | ----------- | ------ |
 | state | Breakdown of CPU usage by type. | Str: ``system``, ``user``, ``wait`` |
 
-### process.cpu.time.total
-
-Total CPU seconds contains different states.
-
-| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
-| ---- | ----------- | ---------- | ----------------------- | --------- |
-| s | Sum | Double | Cumulative | true |
-
 ### process.disk.io
 
 Disk bytes transferred.
@@ -47,6 +55,22 @@ Disk bytes transferred.
 | Name | Description | Values |
 | ---- | ----------- | ------ |
 | direction | Direction of flow of bytes (read or write). | Str: ``read``, ``write`` |
+
+### process.memory.physical
+
+The amount of physical memory in use.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| By | Sum | Int | Cumulative | false |
+
+#### Attributes
+
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| pid | Process identifier (PID). | Any Int |
+| pname | The name of the process executable. On Linux based systems, can be set to the Name in proc/[pid]/status. On Windows, can be set to the base name of GetProcessImageFileNameW. | Any Str |
+| cwd | The cwd of the process executable. | Any Str |
 
 ### process.memory.usage
 
