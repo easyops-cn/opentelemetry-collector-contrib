@@ -43,7 +43,7 @@ type ResourceAttributeConfig struct {
 
 // ResourceAttributesConfig provides config for hostmetricsreceiver/info resource attributes.
 type ResourceAttributesConfig struct {
-	InfoCPUNum   ResourceAttributeConfig `mapstructure:"info.cpuNum"`
+	InfoCPUNum   ResourceAttributeConfig `mapstructure:"info.cpu.num"`
 	InfoHostname ResourceAttributeConfig `mapstructure:"info.hostname"`
 	InfoOrg      ResourceAttributeConfig `mapstructure:"info.org"`
 }

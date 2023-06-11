@@ -110,11 +110,11 @@ func (mb *MetricsBuilder) updateCapacity(rm pmetric.ResourceMetrics) {
 // ResourceMetricsOption applies changes to provided resource metrics.
 type ResourceMetricsOption func(ResourceAttributesConfig, pmetric.ResourceMetrics)
 
-// WithInfoCPUNum sets provided value as "info.cpuNum" attribute for current resource.
+// WithInfoCPUNum sets provided value as "info.cpu.num" attribute for current resource.
 func WithInfoCPUNum(val int64) ResourceMetricsOption {
 	return func(rac ResourceAttributesConfig, rm pmetric.ResourceMetrics) {
 		if rac.InfoCPUNum.Enabled {
-			rm.Resource().Attributes().PutInt("info.cpuNum", val)
+			rm.Resource().Attributes().PutInt("info.cpu.num", val)
 		}
 	}
 }

@@ -4,7 +4,7 @@ all_set:
     info.now:
       enabled: true
   resource_attributes:
-    info.cpuNum:
+    info.cpu.num:
       enabled: true
     info.hostname:
       enabled: true
@@ -15,7 +15,7 @@ none_set:
     info.now:
       enabled: false
   resource_attributes:
-    info.cpuNum:
+    info.cpu.num:
       enabled: false
     info.hostname:
       enabled: false

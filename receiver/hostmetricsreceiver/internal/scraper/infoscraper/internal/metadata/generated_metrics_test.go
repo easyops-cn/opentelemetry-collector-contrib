@@ -69,7 +69,7 @@ func TestMetricsBuilder(t *testing.T) {
 			rm := metrics.ResourceMetrics().At(0)
 			attrCount := 0
 			enabledAttrCount := 0
-			attrVal, ok := rm.Resource().Attributes().Get("info.cpuNum")
+			attrVal, ok := rm.Resource().Attributes().Get("info.cpu.num")
 			attrCount++
 			assert.Equal(t, mb.resourceAttributesConfig.InfoCPUNum.Enabled, ok)
 			if mb.resourceAttributesConfig.InfoCPUNum.Enabled {

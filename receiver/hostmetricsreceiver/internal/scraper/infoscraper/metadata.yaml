@@ -11,7 +11,7 @@ resource_attributes:
     description: hostname.
     enabled: true
     type: string
-  info.cpuNum:
+  info.cpu.num:
     description: cpu num.
     enabled: true
     type: int

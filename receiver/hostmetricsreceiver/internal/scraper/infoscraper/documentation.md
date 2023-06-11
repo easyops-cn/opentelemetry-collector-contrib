@@ -24,6 +24,6 @@ unix timestamp.
 
 | Name | Description | Values | Enabled |
 | ---- | ----------- | ------ | ------- |
-| info.cpuNum | cpu num. | Any Int | true |
+| info.cpu.num | cpu num. | Any Int | true |
 | info.hostname | hostname. | Any Str | true |
 | info.org | common org. | Any Str | true |
