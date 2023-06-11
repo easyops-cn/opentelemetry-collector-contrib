@@ -16,14 +16,14 @@ metrics:
 
 unix timestamp.
 
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| 1 | Gauge | Double |
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | false |
 
-## Resource Attributes
+#### Attributes
 
-| Name | Description | Values | Enabled |
-| ---- | ----------- | ------ | ------- |
-| info.cpu.num | cpu num. | Any Int | true |
-| info.hostname | hostname. | Any Str | true |
-| info.org | common org. | Any Str | true |
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| org | org | Any Str |
+| hostname | hostname. | Any Str |
+| cpu.num | cpu num. | Any Int |

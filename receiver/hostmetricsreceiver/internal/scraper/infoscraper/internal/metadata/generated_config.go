@@ -36,41 +36,13 @@ func DefaultMetricsConfig() MetricsConfig {
 	}
 }
 
-// ResourceAttributeConfig provides common config for a particular resource attribute.
-type ResourceAttributeConfig struct {
-	Enabled bool `mapstructure:"enabled"`
-}
-
-// ResourceAttributesConfig provides config for hostmetricsreceiver/info resource attributes.
-type ResourceAttributesConfig struct {
-	InfoCPUNum   ResourceAttributeConfig `mapstructure:"info.cpu.num"`
-	InfoHostname ResourceAttributeConfig `mapstructure:"info.hostname"`
-	InfoOrg      ResourceAttributeConfig `mapstructure:"info.org"`
-}
-
-func DefaultResourceAttributesConfig() ResourceAttributesConfig {
-	return ResourceAttributesConfig{
-		InfoCPUNum: ResourceAttributeConfig{
-			Enabled: true,
-		},
-		InfoHostname: ResourceAttributeConfig{
-			Enabled: true,
-		},
-		InfoOrg: ResourceAttributeConfig{
-			Enabled: true,
-		},
-	}
-}
-
 // MetricsBuilderConfig is a configuration for hostmetricsreceiver/info metrics builder.
 type MetricsBuilderConfig struct {
-	Metrics            MetricsConfig            `mapstructure:"metrics"`
-	ResourceAttributes ResourceAttributesConfig `mapstructure:"resource_attributes"`
+	Metrics MetricsConfig `mapstructure:"metrics"`
 }
 
 func DefaultMetricsBuilderConfig() MetricsBuilderConfig {
 	return MetricsBuilderConfig{
-		Metrics:            DefaultMetricsConfig(),
-		ResourceAttributes: DefaultResourceAttributesConfig(),
+		Metrics: DefaultMetricsConfig(),
 	}
 }

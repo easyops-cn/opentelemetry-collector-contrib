@@ -2,18 +2,15 @@ type: hostmetricsreceiver/info
 
 sem_conv_version: 1.9.0
 
-resource_attributes:
-  info.org:
-    description: common org.
-    enabled: true
+attributes:
+  org:
+    description: org
     type: string
-  info.hostname:
+  hostname:
     description: hostname.
-    enabled: true
     type: string
-  info.cpu.num:
+  cpu.num:  
     description: cpu num.
-    enabled: true
     type: int
 
 metrics:
@@ -21,5 +18,8 @@ metrics:
     enabled: true
     description: unix timestamp.
     unit: 1
-    gauge:
-      value_type: double
+    sum:
+      value_type: int
+      aggregation: cumulative
+      monotonic: false
+    attributes: [org, hostname, cpu.num]

@@ -23,29 +23,35 @@ func (m *metricInfoNow) init() {
 	m.data.SetName("info.now")
 	m.data.SetDescription("unix timestamp.")
 	m.data.SetUnit("1")
-	m.data.SetEmptyGauge()
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricInfoNow) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64) {
+func (m *metricInfoNow) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, orgAttributeValue string, hostnameAttributeValue string, cpuNumAttributeValue int64) {
 	if !m.config.Enabled {
 		return
 	}
-	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp := m.data.Sum().DataPoints().AppendEmpty()
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
-	dp.SetDoubleValue(val)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("org", orgAttributeValue)
+	dp.Attributes().PutStr("hostname", hostnameAttributeValue)
+	dp.Attributes().PutInt("cpu.num", cpuNumAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
 func (m *metricInfoNow) updateCapacity() {
-	if m.data.Gauge().DataPoints().Len() > m.capacity {
-		m.capacity = m.data.Gauge().DataPoints().Len()
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
 func (m *metricInfoNow) emit(metrics pmetric.MetricSlice) {
-	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
 		m.init()
@@ -64,13 +70,12 @@ func newMetricInfoNow(cfg MetricConfig) metricInfoNow {
 // MetricsBuilder provides an interface for scrapers to report metrics while taking care of all the transformations
 // required to produce metric representation defined in metadata and user config.
 type MetricsBuilder struct {
-	startTime                pcommon.Timestamp   // start time that will be applied to all recorded data points.
-	metricsCapacity          int                 // maximum observed number of metrics per resource.
-	resourceCapacity         int                 // maximum observed number of resource attributes.
-	metricsBuffer            pmetric.Metrics     // accumulates metrics data before emitting.
-	buildInfo                component.BuildInfo // contains version information
-	resourceAttributesConfig ResourceAttributesConfig
-	metricInfoNow            metricInfoNow
+	startTime        pcommon.Timestamp   // start time that will be applied to all recorded data points.
+	metricsCapacity  int                 // maximum observed number of metrics per resource.
+	resourceCapacity int                 // maximum observed number of resource attributes.
+	metricsBuffer    pmetric.Metrics     // accumulates metrics data before emitting.
+	buildInfo        component.BuildInfo // contains version information
+	metricInfoNow    metricInfoNow
 }
 
 // metricBuilderOption applies changes to default metrics builder.
@@ -85,11 +90,10 @@ func WithStartTime(startTime pcommon.Timestamp) metricBuilderOption {
 
 func NewMetricsBuilder(mbc MetricsBuilderConfig, settings receiver.CreateSettings, options ...metricBuilderOption) *MetricsBuilder {
 	mb := &MetricsBuilder{
-		startTime:                pcommon.NewTimestampFromTime(time.Now()),
-		metricsBuffer:            pmetric.NewMetrics(),
-		buildInfo:                settings.BuildInfo,
-		resourceAttributesConfig: mbc.ResourceAttributes,
-		metricInfoNow:            newMetricInfoNow(mbc.Metrics.InfoNow),
+		startTime:     pcommon.NewTimestampFromTime(time.Now()),
+		metricsBuffer: pmetric.NewMetrics(),
+		buildInfo:     settings.BuildInfo,
+		metricInfoNow: newMetricInfoNow(mbc.Metrics.InfoNow),
 	}
 	for _, op := range options {
 		op(mb)
@@ -108,39 +112,12 @@ func (mb *MetricsBuilder) updateCapacity(rm pmetric.ResourceMetrics) {
 }
 
 // ResourceMetricsOption applies changes to provided resource metrics.
-type ResourceMetricsOption func(ResourceAttributesConfig, pmetric.ResourceMetrics)
-
-// WithInfoCPUNum sets provided value as "info.cpu.num" attribute for current resource.
-func WithInfoCPUNum(val int64) ResourceMetricsOption {
-	return func(rac ResourceAttributesConfig, rm pmetric.ResourceMetrics) {
-		if rac.InfoCPUNum.Enabled {
-			rm.Resource().Attributes().PutInt("info.cpu.num", val)
-		}
-	}
-}
-
-// WithInfoHostname sets provided value as "info.hostname" attribute for current resource.
-func WithInfoHostname(val string) ResourceMetricsOption {
-	return func(rac ResourceAttributesConfig, rm pmetric.ResourceMetrics) {
-		if rac.InfoHostname.Enabled {
-			rm.Resource().Attributes().PutStr("info.hostname", val)
-		}
-	}
-}
-
-// WithInfoOrg sets provided value as "info.org" attribute for current resource.
-func WithInfoOrg(val string) ResourceMetricsOption {
-	return func(rac ResourceAttributesConfig, rm pmetric.ResourceMetrics) {
-		if rac.InfoOrg.Enabled {
-			rm.Resource().Attributes().PutStr("info.org", val)
-		}
-	}
-}
+type ResourceMetricsOption func(pmetric.ResourceMetrics)
 
 // WithStartTimeOverride overrides start time for all the resource metrics data points.
 // This option should be only used if different start time has to be set on metrics coming from different resources.
 func WithStartTimeOverride(start pcommon.Timestamp) ResourceMetricsOption {
-	return func(_ ResourceAttributesConfig, rm pmetric.ResourceMetrics) {
+	return func(rm pmetric.ResourceMetrics) {
 		var dps pmetric.NumberDataPointSlice
 		metrics := rm.ScopeMetrics().At(0).Metrics()
 		for i := 0; i < metrics.Len(); i++ {
@@ -173,7 +150,7 @@ func (mb *MetricsBuilder) EmitForResource(rmo ...ResourceMetricsOption) {
 	mb.metricInfoNow.emit(ils.Metrics())
 
 	for _, op := range rmo {
-		op(mb.resourceAttributesConfig, rm)
+		op(rm)
 	}
 	if ils.Metrics().Len() > 0 {
 		mb.updateCapacity(rm)
@@ -192,8 +169,8 @@ func (mb *MetricsBuilder) Emit(rmo ...ResourceMetricsOption) pmetric.Metrics {
 }
 
 // RecordInfoNowDataPoint adds a data point to info.now metric.
-func (mb *MetricsBuilder) RecordInfoNowDataPoint(ts pcommon.Timestamp, val float64) {
-	mb.metricInfoNow.recordDataPoint(mb.startTime, ts, val)
+func (mb *MetricsBuilder) RecordInfoNowDataPoint(ts pcommon.Timestamp, val int64, orgAttributeValue string, hostnameAttributeValue string, cpuNumAttributeValue int64) {
+	mb.metricInfoNow.recordDataPoint(mb.startTime, ts, val, orgAttributeValue, hostnameAttributeValue, cpuNumAttributeValue)
 }
 
 // Reset resets metrics builder to its initial state. It should be used when external metrics source is restarted,

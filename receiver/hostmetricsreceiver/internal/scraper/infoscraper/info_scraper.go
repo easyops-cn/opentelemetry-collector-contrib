@@ -65,17 +65,19 @@ func (s *scraper) shutdown(ctx context.Context) error {
 // scrape
 func (s *scraper) scrape(_ context.Context) (pmetric.Metrics, error) {
 	now := pcommon.NewTimestampFromTime(s.now())
-	s.mb.RecordInfoNowDataPoint(now, float64(now.AsTime().Unix()))
 
 	hostname, err := s.hostname()
 	if err != nil {
 		return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
 	}
-	return s.mb.Emit(
-		metadata.WithInfoOrg(org()),
-		metadata.WithInfoCPUNum(int64(s.cpuNum())),
-		metadata.WithInfoHostname(hostname),
-	), nil
+	s.mb.RecordInfoNowDataPoint(
+		now, now.AsTime().Unix(),
+		org(),
+		hostname,
+		int64(s.cpuNum()),
+	)
+
+	return s.mb.Emit(), nil
 }
 
 func org() string {
