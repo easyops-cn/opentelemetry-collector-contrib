@@ -1078,10 +1078,12 @@ func TestScrapeMetrics_DontCheckDisabledMetrics(t *testing.T) {
 	metricsBuilderConfig := metadata.DefaultMetricsBuilderConfig()
 
 	metricsBuilderConfig.Metrics.ProcessCPUTime.Enabled = false
+	metricsBuilderConfig.Metrics.ProcessAllCPUTime.Enabled = false
 	metricsBuilderConfig.Metrics.ProcessDiskIo.Enabled = false
 	metricsBuilderConfig.Metrics.ProcessDiskOperations.Enabled = false
 	metricsBuilderConfig.Metrics.ProcessMemoryUsage.Enabled = false
 	metricsBuilderConfig.Metrics.ProcessMemoryVirtual.Enabled = false
+	metricsBuilderConfig.Metrics.ProcessMemoryPhysical.Enabled = false
 
 	t.Run("Metrics don't log errors when disabled", func(t *testing.T) {
 		config := &Config{MetricsBuilderConfig: metricsBuilderConfig}

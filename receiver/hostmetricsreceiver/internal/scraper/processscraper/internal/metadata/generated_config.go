@@ -25,12 +25,13 @@ func (ms *MetricConfig) Unmarshal(parser *confmap.Conf) error {
 
 // MetricsConfig provides config for hostmetricsreceiver/process metrics.
 type MetricsConfig struct {
+	ProcessAllCPUTime          MetricConfig `mapstructure:"process.all.cpu.time"`
 	ProcessContextSwitches     MetricConfig `mapstructure:"process.context_switches"`
 	ProcessCPUTime             MetricConfig `mapstructure:"process.cpu.time"`
-	ProcessCPUTimeTotal        MetricConfig `mapstructure:"process.cpu.time.total"`
 	ProcessCPUUtilization      MetricConfig `mapstructure:"process.cpu.utilization"`
 	ProcessDiskIo              MetricConfig `mapstructure:"process.disk.io"`
 	ProcessDiskOperations      MetricConfig `mapstructure:"process.disk.operations"`
+	ProcessMemoryPhysical      MetricConfig `mapstructure:"process.memory.physical"`
 	ProcessMemoryUsage         MetricConfig `mapstructure:"process.memory.usage"`
 	ProcessMemoryUtilization   MetricConfig `mapstructure:"process.memory.utilization"`
 	ProcessMemoryVirtual       MetricConfig `mapstructure:"process.memory.virtual"`
@@ -42,13 +43,13 @@ type MetricsConfig struct {
 
 func DefaultMetricsConfig() MetricsConfig {
 	return MetricsConfig{
+		ProcessAllCPUTime: MetricConfig{
+			Enabled: true,
+		},
 		ProcessContextSwitches: MetricConfig{
 			Enabled: false,
 		},
 		ProcessCPUTime: MetricConfig{
-			Enabled: true,
-		},
-		ProcessCPUTimeTotal: MetricConfig{
 			Enabled: true,
 		},
 		ProcessCPUUtilization: MetricConfig{
@@ -59,6 +60,9 @@ func DefaultMetricsConfig() MetricsConfig {
 		},
 		ProcessDiskOperations: MetricConfig{
 			Enabled: false,
+		},
+		ProcessMemoryPhysical: MetricConfig{
+			Enabled: true,
 		},
 		ProcessMemoryUsage: MetricConfig{
 			Enabled: true,

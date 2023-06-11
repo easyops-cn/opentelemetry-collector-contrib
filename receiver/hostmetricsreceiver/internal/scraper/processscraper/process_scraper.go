@@ -25,7 +25,7 @@ import (
 
 const (
 	cpuMetricsLen               = 2
-	memoryMetricsLen            = 2
+	memoryMetricsLen            = 3
 	memoryUtilizationMetricsLen = 1
 	diskMetricsLen              = 1
 	pagingMetricsLen            = 1
@@ -270,7 +270,7 @@ func (s *scraper) getProcessMetadata() ([]*processMetadata, error) {
 
 func (s *scraper) scrapeAndAppendCPUTimeMetric(now pcommon.Timestamp, md *processMetadata) error {
 	pid, handle := md.pid, md.handle
-	if !s.config.MetricsBuilderConfig.Metrics.ProcessCPUTime.Enabled {
+	if !(s.config.MetricsBuilderConfig.Metrics.ProcessCPUTime.Enabled || s.config.MetricsBuilderConfig.Metrics.ProcessAllCPUTime.Enabled) {
 		return nil
 	}
 
@@ -280,7 +280,7 @@ func (s *scraper) scrapeAndAppendCPUTimeMetric(now pcommon.Timestamp, md *proces
 	}
 
 	s.recordCPUTimeMetric(now, times)
-	s.recordCPUTimeTotalMetric(now, times)
+	s.recordAllCPUTimeMetric(now, times, int64(pid), md.executable.name, md.executable.cwd)
 	if _, ok := s.ucals[pid]; !ok {
 		s.ucals[pid] = &ucal.CPUUtilizationCalculator{}
 	}
@@ -289,8 +289,8 @@ func (s *scraper) scrapeAndAppendCPUTimeMetric(now pcommon.Timestamp, md *proces
 	return err
 }
 
-func (s *scraper) recordCPUTimeTotalMetric(now pcommon.Timestamp, cpuTime *cpu.TimesStat) {
-	s.mb.RecordProcessCPUTimeTotalDataPoint(now, getCPUTimeTotal(cpuTime))
+func (s *scraper) recordAllCPUTimeMetric(now pcommon.Timestamp, cpuTime *cpu.TimesStat, pid int64, pname string, cwd string) {
+	s.mb.RecordProcessAllCPUTimeDataPoint(now, getCPUTimeTotal(cpuTime), pid, pname, cwd)
 }
 
 func getCPUTimeTotal(c *cpu.TimesStat) float64 {
@@ -302,7 +302,9 @@ func getCPUTimeTotal(c *cpu.TimesStat) float64 {
 
 func (s *scraper) scrapeAndAppendMemoryUsageMetrics(now pcommon.Timestamp, md *processMetadata) error {
 	handle := md.handle
-	if !(s.config.MetricsBuilderConfig.Metrics.ProcessMemoryUsage.Enabled || s.config.MetricsBuilderConfig.Metrics.ProcessMemoryVirtual.Enabled) {
+	if !(s.config.MetricsBuilderConfig.Metrics.ProcessMemoryUsage.Enabled ||
+		s.config.MetricsBuilderConfig.Metrics.ProcessMemoryVirtual.Enabled ||
+		s.config.MetricsBuilderConfig.Metrics.ProcessMemoryPhysical.Enabled) {
 		return nil
 	}
 
@@ -311,8 +313,10 @@ func (s *scraper) scrapeAndAppendMemoryUsageMetrics(now pcommon.Timestamp, md *p
 		return err
 	}
 
+	pid, pname, cwd := md.pid, md.executable.name, md.executable.cwd
 	s.mb.RecordProcessMemoryUsageDataPoint(now, int64(mem.RSS))
 	s.mb.RecordProcessMemoryVirtualDataPoint(now, int64(mem.VMS))
+	s.mb.RecordProcessMemoryPhysicalDataPoint(now, int64(mem.VMS), int64(pid), pname, cwd)
 	return nil
 }
 
