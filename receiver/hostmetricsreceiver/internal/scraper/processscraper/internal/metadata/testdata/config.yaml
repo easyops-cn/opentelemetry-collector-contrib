@@ -5,6 +5,8 @@ all_set:
       enabled: true
     process.cpu.time:
       enabled: true
+    process.cpu.time.total:
+      enabled: true
     process.cpu.utilization:
       enabled: true
     process.disk.io:
@@ -29,6 +31,8 @@ all_set:
     process.command:
       enabled: true
     process.command_line:
+      enabled: true
+    process.executable.cwd:
       enabled: true
     process.executable.name:
       enabled: true
@@ -46,6 +50,8 @@ none_set:
       enabled: false
     process.cpu.time:
       enabled: false
+    process.cpu.time.total:
+      enabled: false
     process.cpu.utilization:
       enabled: false
     process.disk.io:
@@ -70,6 +76,8 @@ none_set:
     process.command:
       enabled: false
     process.command_line:
+      enabled: false
+    process.executable.cwd:
       enabled: false
     process.executable.name:
       enabled: false

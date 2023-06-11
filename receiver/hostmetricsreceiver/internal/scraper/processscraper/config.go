@@ -38,11 +38,6 @@ type Config struct {
 	// ScrapeProcessDelay is used to indicate the minimum amount of time a process must be running
 	// before metrics are scraped for it.  The default value is 0 seconds (0s)
 	ScrapeProcessDelay time.Duration `mapstructure:"scrape_process_delay"`
-
-	// 自定义process_cpu_time
-	CustomCPUTime bool `mapstructure:"custom_cpu_time"`
-	// 自定义process_memory_usage
-	CustomMemoryUsage bool `mapstructure:"custom_memory_usage"`
 }
 
 type MatchConfig struct {

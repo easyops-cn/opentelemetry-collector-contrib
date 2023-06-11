@@ -28,6 +28,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 				Metrics: MetricsConfig{
 					ProcessContextSwitches:     MetricConfig{Enabled: true},
 					ProcessCPUTime:             MetricConfig{Enabled: true},
+					ProcessCPUTimeTotal:        MetricConfig{Enabled: true},
 					ProcessCPUUtilization:      MetricConfig{Enabled: true},
 					ProcessDiskIo:              MetricConfig{Enabled: true},
 					ProcessDiskOperations:      MetricConfig{Enabled: true},
@@ -42,6 +43,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 				ResourceAttributes: ResourceAttributesConfig{
 					ProcessCommand:        ResourceAttributeConfig{Enabled: true},
 					ProcessCommandLine:    ResourceAttributeConfig{Enabled: true},
+					ProcessExecutableCwd:  ResourceAttributeConfig{Enabled: true},
 					ProcessExecutableName: ResourceAttributeConfig{Enabled: true},
 					ProcessExecutablePath: ResourceAttributeConfig{Enabled: true},
 					ProcessOwner:          ResourceAttributeConfig{Enabled: true},
@@ -56,6 +58,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 				Metrics: MetricsConfig{
 					ProcessContextSwitches:     MetricConfig{Enabled: false},
 					ProcessCPUTime:             MetricConfig{Enabled: false},
+					ProcessCPUTimeTotal:        MetricConfig{Enabled: false},
 					ProcessCPUUtilization:      MetricConfig{Enabled: false},
 					ProcessDiskIo:              MetricConfig{Enabled: false},
 					ProcessDiskOperations:      MetricConfig{Enabled: false},
@@ -70,6 +73,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 				ResourceAttributes: ResourceAttributesConfig{
 					ProcessCommand:        ResourceAttributeConfig{Enabled: false},
 					ProcessCommandLine:    ResourceAttributeConfig{Enabled: false},
+					ProcessExecutableCwd:  ResourceAttributeConfig{Enabled: false},
 					ProcessExecutableName: ResourceAttributeConfig{Enabled: false},
 					ProcessExecutablePath: ResourceAttributeConfig{Enabled: false},
 					ProcessOwner:          ResourceAttributeConfig{Enabled: false},

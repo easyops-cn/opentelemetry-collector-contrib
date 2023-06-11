@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"path/filepath"
 	"runtime"
 	"time"
 
@@ -278,16 +277,8 @@ func (s *scraper) scrapeAndAppendCPUTimeMetric(now pcommon.Timestamp, md *proces
 		return err
 	}
 
-	if s.config.CustomCPUTime {
-		labels := pcommon.NewMap()
-		labels.PutInt(metadata.AttributePid.String(), int64(md.pid))
-		labels.PutStr(metadata.AttributePname.String(), md.executable.name)
-		labels.PutStr(metadata.AttributeBcwd.String(), filepath.Base(md.executable.cwd))
-		s.recordTotalCPUTimeMetric(now, times, labels)
-	} else {
-		s.recordCPUTimeMetric(now, times)
-	}
-
+	s.recordCPUTimeMetric(now, times)
+	s.recordCPUTimeTotalMetric(now, times)
 	if _, ok := s.ucals[pid]; !ok {
 		s.ucals[pid] = &ucal.CPUUtilizationCalculator{}
 	}
@@ -296,8 +287,8 @@ func (s *scraper) scrapeAndAppendCPUTimeMetric(now pcommon.Timestamp, md *proces
 	return err
 }
 
-func (s *scraper) recordTotalCPUTimeMetric(now pcommon.Timestamp, cpuTime *cpu.TimesStat, labels pcommon.Map) {
-	s.mb.RecordTotalProcessCPUTimeDataPoint(now, getCPUTimeTotal(cpuTime), labels)
+func (s *scraper) recordCPUTimeTotalMetric(now pcommon.Timestamp, cpuTime *cpu.TimesStat) {
+	s.mb.RecordProcessCPUTimeTotalDataPoint(now, getCPUTimeTotal(cpuTime))
 }
 
 func getCPUTimeTotal(c *cpu.TimesStat) float64 {
@@ -318,14 +309,7 @@ func (s *scraper) scrapeAndAppendMemoryUsageMetrics(now pcommon.Timestamp, md *p
 		return err
 	}
 
-	labels := pcommon.NewMap()
-	if s.config.CustomMemoryUsage {
-		labels.PutInt(metadata.AttributePid.String(), int64(md.pid))
-		labels.PutStr(metadata.AttributePname.String(), md.executable.name)
-		labels.PutStr(metadata.AttributeBcwd.String(), filepath.Base(md.executable.cwd))
-	}
-
-	s.mb.RecordProcessMemoryUsageDataPoint(now, int64(mem.RSS), labels)
+	s.mb.RecordProcessMemoryUsageDataPoint(now, int64(mem.RSS))
 	s.mb.RecordProcessMemoryVirtualDataPoint(now, int64(mem.VMS))
 	return nil
 }

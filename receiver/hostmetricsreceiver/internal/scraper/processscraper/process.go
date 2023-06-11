@@ -47,6 +47,7 @@ func (m *processMetadata) resourceOptions() []metadata.ResourceMetricsOption {
 		metadata.WithProcessParentPid(int64(m.parentPid)),
 		metadata.WithProcessExecutableName(m.executable.name),
 		metadata.WithProcessExecutablePath(m.executable.path),
+		metadata.WithProcessExecutableCwd(m.executable.cwd),
 	)
 	if m.command != nil {
 		opts = append(opts, metadata.WithProcessCommand(m.command.command))
