@@ -1,0 +1,25 @@
+type: hostmetricsreceiver/info
+
+sem_conv_version: 1.9.0
+
+resource_attributes:
+  info.org:
+    description: common org.
+    enabled: true
+    type: string
+  info.hostname:
+    description: hostname.
+    enabled: true
+    type: string
+  info.cpu.num:
+    description: cpu num.
+    enabled: true
+    type: int
+
+metrics:
+  info.now:
+    enabled: true
+    description: unix timestamp.
+    unit: 1
+    gauge:
+      value_type: double

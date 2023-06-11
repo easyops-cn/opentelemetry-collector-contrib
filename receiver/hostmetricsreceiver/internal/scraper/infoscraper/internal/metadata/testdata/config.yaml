@@ -1,0 +1,23 @@
+default:
+all_set:
+  metrics:
+    info.now:
+      enabled: true
+  resource_attributes:
+    info.cpu.num:
+      enabled: true
+    info.hostname:
+      enabled: true
+    info.org:
+      enabled: true
+none_set:
+  metrics:
+    info.now:
+      enabled: false
+  resource_attributes:
+    info.cpu.num:
+      enabled: false
+    info.hostname:
+      enabled: false
+    info.org:
+      enabled: false
