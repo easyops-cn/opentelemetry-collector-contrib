@@ -56,9 +56,9 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordInfoNowDataPoint(ts, 1)
+			mb.RecordInfoNowDataPoint(ts, 1, "attr-val", "attr-val", 1)
 
-			metrics := mb.Emit(WithInfoCPUNum(1), WithInfoHostname("attr-val"), WithInfoOrg("attr-val"))
+			metrics := mb.Emit()
 
 			if test.configSet == testSetNone {
 				assert.Equal(t, 0, metrics.ResourceMetrics().Len())
@@ -69,29 +69,8 @@ func TestMetricsBuilder(t *testing.T) {
 			rm := metrics.ResourceMetrics().At(0)
 			attrCount := 0
 			enabledAttrCount := 0
-			attrVal, ok := rm.Resource().Attributes().Get("info.cpu.num")
-			attrCount++
-			assert.Equal(t, mb.resourceAttributesConfig.InfoCPUNum.Enabled, ok)
-			if mb.resourceAttributesConfig.InfoCPUNum.Enabled {
-				enabledAttrCount++
-				assert.EqualValues(t, 1, attrVal.Int())
-			}
-			attrVal, ok = rm.Resource().Attributes().Get("info.hostname")
-			attrCount++
-			assert.Equal(t, mb.resourceAttributesConfig.InfoHostname.Enabled, ok)
-			if mb.resourceAttributesConfig.InfoHostname.Enabled {
-				enabledAttrCount++
-				assert.EqualValues(t, "attr-val", attrVal.Str())
-			}
-			attrVal, ok = rm.Resource().Attributes().Get("info.org")
-			attrCount++
-			assert.Equal(t, mb.resourceAttributesConfig.InfoOrg.Enabled, ok)
-			if mb.resourceAttributesConfig.InfoOrg.Enabled {
-				enabledAttrCount++
-				assert.EqualValues(t, "attr-val", attrVal.Str())
-			}
 			assert.Equal(t, enabledAttrCount, rm.Resource().Attributes().Len())
-			assert.Equal(t, attrCount, 3)
+			assert.Equal(t, attrCount, 0)
 
 			assert.Equal(t, 1, rm.ScopeMetrics().Len())
 			ms := rm.ScopeMetrics().At(0).Metrics()
@@ -107,15 +86,26 @@ func TestMetricsBuilder(t *testing.T) {
 				case "info.now":
 					assert.False(t, validatedMetrics["info.now"], "Found a duplicate in the metrics slice: info.now")
 					validatedMetrics["info.now"] = true
-					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
-					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
 					assert.Equal(t, "unix timestamp.", ms.At(i).Description())
 					assert.Equal(t, "1", ms.At(i).Unit())
-					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
+					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
+					dp := ms.At(i).Sum().DataPoints().At(0)
 					assert.Equal(t, start, dp.StartTimestamp())
 					assert.Equal(t, ts, dp.Timestamp())
-					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
-					assert.Equal(t, float64(1), dp.DoubleValue())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("org")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("hostname")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("cpu.num")
+					assert.True(t, ok)
+					assert.EqualValues(t, 1, attrVal.Int())
 				}
 			}
 		})

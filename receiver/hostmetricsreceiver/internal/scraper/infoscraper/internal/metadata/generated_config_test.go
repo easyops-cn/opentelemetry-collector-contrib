@@ -28,11 +28,6 @@ func TestMetricsBuilderConfig(t *testing.T) {
 				Metrics: MetricsConfig{
 					InfoNow: MetricConfig{Enabled: true},
 				},
-				ResourceAttributes: ResourceAttributesConfig{
-					InfoCPUNum:   ResourceAttributeConfig{Enabled: true},
-					InfoHostname: ResourceAttributeConfig{Enabled: true},
-					InfoOrg:      ResourceAttributeConfig{Enabled: true},
-				},
 			},
 		},
 		{
@@ -41,18 +36,13 @@ func TestMetricsBuilderConfig(t *testing.T) {
 				Metrics: MetricsConfig{
 					InfoNow: MetricConfig{Enabled: false},
 				},
-				ResourceAttributes: ResourceAttributesConfig{
-					InfoCPUNum:   ResourceAttributeConfig{Enabled: false},
-					InfoHostname: ResourceAttributeConfig{Enabled: false},
-					InfoOrg:      ResourceAttributeConfig{Enabled: false},
-				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := loadMetricsBuilderConfig(t, tt.name)
-			if diff := cmp.Diff(tt.want, cfg, cmpopts.IgnoreUnexported(MetricConfig{}, ResourceAttributeConfig{})); diff != "" {
+			if diff := cmp.Diff(tt.want, cfg, cmpopts.IgnoreUnexported(MetricConfig{})); diff != "" {
 				t.Errorf("Config mismatch (-expected +actual):\n%s", diff)
 			}
 		})
