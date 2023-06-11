@@ -297,7 +297,14 @@ func (s *scraper) scrapeAndAppendCPUTimeMetric(now pcommon.Timestamp, md *proces
 }
 
 func (s *scraper) recordTotalCPUTimeMetric(now pcommon.Timestamp, cpuTime *cpu.TimesStat, labels pcommon.Map) {
-	s.mb.RecordTotalProcessCPUTimeDataPoint(now, cpuTime.Total(), labels)
+	s.mb.RecordTotalProcessCPUTimeDataPoint(now, getCPUTimeTotal(cpuTime), labels)
+}
+
+func getCPUTimeTotal(c *cpu.TimesStat) float64 {
+	total := c.User + c.System + c.Idle + c.Nice + c.Iowait + c.Irq +
+		c.Softirq + c.Steal + c.Guest + c.GuestNice
+
+	return total
 }
 
 func (s *scraper) scrapeAndAppendMemoryUsageMetrics(now pcommon.Timestamp, md *processMetadata) error {
