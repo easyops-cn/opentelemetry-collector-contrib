@@ -207,7 +207,9 @@ func (s *scraper) getProcessMetadata() ([]*processMetadata, error) {
 
 		cwd, err := getProcessCwd(handle)
 		if err != nil {
-			errs.AddPartial(1, fmt.Errorf("error reading process cwd for pid %v: %w", pid, err))
+			if !s.config.MuteProcessCwdError {
+				errs.AddPartial(1, fmt.Errorf("error reading process cwd for pid %v: %w", pid, err))
+			}
 			continue
 		}
 
