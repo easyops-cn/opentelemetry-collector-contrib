@@ -61,6 +61,10 @@ func TestMetricsBuilder(t *testing.T) {
 			allMetricsCount++
 			mb.RecordProcessCPUTimeDataPoint(ts, 1, AttributeState(1))
 
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordProcessCPUTimeTotalDataPoint(ts, 1)
+
 			allMetricsCount++
 			mb.RecordProcessCPUUtilizationDataPoint(ts, 1, AttributeState(1))
 
@@ -94,7 +98,7 @@ func TestMetricsBuilder(t *testing.T) {
 			allMetricsCount++
 			mb.RecordProcessThreadsDataPoint(ts, 1)
 
-			metrics := mb.Emit(WithProcessCommand("attr-val"), WithProcessCommandLine("attr-val"), WithProcessExecutableName("attr-val"), WithProcessExecutablePath("attr-val"), WithProcessOwner("attr-val"), WithProcessParentPid(1), WithProcessPid(1))
+			metrics := mb.Emit(WithProcessCommand("attr-val"), WithProcessCommandLine("attr-val"), WithProcessExecutableCwd("attr-val"), WithProcessExecutableName("attr-val"), WithProcessExecutablePath("attr-val"), WithProcessOwner("attr-val"), WithProcessParentPid(1), WithProcessPid(1))
 
 			if test.configSet == testSetNone {
 				assert.Equal(t, 0, metrics.ResourceMetrics().Len())
@@ -116,6 +120,13 @@ func TestMetricsBuilder(t *testing.T) {
 			attrCount++
 			assert.Equal(t, mb.resourceAttributesConfig.ProcessCommandLine.Enabled, ok)
 			if mb.resourceAttributesConfig.ProcessCommandLine.Enabled {
+				enabledAttrCount++
+				assert.EqualValues(t, "attr-val", attrVal.Str())
+			}
+			attrVal, ok = rm.Resource().Attributes().Get("process.executable.cwd")
+			attrCount++
+			assert.Equal(t, mb.resourceAttributesConfig.ProcessExecutableCwd.Enabled, ok)
+			if mb.resourceAttributesConfig.ProcessExecutableCwd.Enabled {
 				enabledAttrCount++
 				assert.EqualValues(t, "attr-val", attrVal.Str())
 			}
@@ -155,7 +166,7 @@ func TestMetricsBuilder(t *testing.T) {
 				assert.EqualValues(t, 1, attrVal.Int())
 			}
 			assert.Equal(t, enabledAttrCount, rm.Resource().Attributes().Len())
-			assert.Equal(t, attrCount, 7)
+			assert.Equal(t, attrCount, 8)
 
 			assert.Equal(t, 1, rm.ScopeMetrics().Len())
 			ms := rm.ScopeMetrics().At(0).Metrics()
@@ -202,6 +213,20 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("state")
 					assert.True(t, ok)
 					assert.Equal(t, "system", attrVal.Str())
+				case "process.cpu.time.total":
+					assert.False(t, validatedMetrics["process.cpu.time.total"], "Found a duplicate in the metrics slice: process.cpu.time.total")
+					validatedMetrics["process.cpu.time.total"] = true
+					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
+					assert.Equal(t, "Total CPU seconds contains different states.", ms.At(i).Description())
+					assert.Equal(t, "s", ms.At(i).Unit())
+					assert.Equal(t, true, ms.At(i).Sum().IsMonotonic())
+					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
+					dp := ms.At(i).Sum().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.Equal(t, float64(1), dp.DoubleValue())
 				case "process.cpu.utilization":
 					assert.False(t, validatedMetrics["process.cpu.utilization"], "Found a duplicate in the metrics slice: process.cpu.utilization")
 					validatedMetrics["process.cpu.utilization"] = true

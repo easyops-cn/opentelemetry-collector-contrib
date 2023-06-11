@@ -27,6 +27,7 @@ func (ms *MetricConfig) Unmarshal(parser *confmap.Conf) error {
 type MetricsConfig struct {
 	ProcessContextSwitches     MetricConfig `mapstructure:"process.context_switches"`
 	ProcessCPUTime             MetricConfig `mapstructure:"process.cpu.time"`
+	ProcessCPUTimeTotal        MetricConfig `mapstructure:"process.cpu.time.total"`
 	ProcessCPUUtilization      MetricConfig `mapstructure:"process.cpu.utilization"`
 	ProcessDiskIo              MetricConfig `mapstructure:"process.disk.io"`
 	ProcessDiskOperations      MetricConfig `mapstructure:"process.disk.operations"`
@@ -45,6 +46,9 @@ func DefaultMetricsConfig() MetricsConfig {
 			Enabled: false,
 		},
 		ProcessCPUTime: MetricConfig{
+			Enabled: true,
+		},
+		ProcessCPUTimeTotal: MetricConfig{
 			Enabled: true,
 		},
 		ProcessCPUUtilization: MetricConfig{
@@ -89,6 +93,7 @@ type ResourceAttributeConfig struct {
 type ResourceAttributesConfig struct {
 	ProcessCommand        ResourceAttributeConfig `mapstructure:"process.command"`
 	ProcessCommandLine    ResourceAttributeConfig `mapstructure:"process.command_line"`
+	ProcessExecutableCwd  ResourceAttributeConfig `mapstructure:"process.executable.cwd"`
 	ProcessExecutableName ResourceAttributeConfig `mapstructure:"process.executable.name"`
 	ProcessExecutablePath ResourceAttributeConfig `mapstructure:"process.executable.path"`
 	ProcessOwner          ResourceAttributeConfig `mapstructure:"process.owner"`
@@ -102,6 +107,9 @@ func DefaultResourceAttributesConfig() ResourceAttributesConfig {
 			Enabled: true,
 		},
 		ProcessCommandLine: ResourceAttributeConfig{
+			Enabled: true,
+		},
+		ProcessExecutableCwd: ResourceAttributeConfig{
 			Enabled: true,
 		},
 		ProcessExecutableName: ResourceAttributeConfig{
