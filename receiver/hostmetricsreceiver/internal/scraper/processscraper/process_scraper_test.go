@@ -179,21 +179,14 @@ func assertCPUTimeMetricValid(t *testing.T, resourceMetrics pmetric.ResourceMetr
 	if startTime != 0 {
 		internal.AssertSumMetricStartTimeEquals(t, cpuTimeMetric, startTime)
 	}
-	points := cpuTimeMetric.Sum().DataPoints()
-	for i := 0; i < points.Len(); i++ {
-		attributes := points.At(i).Attributes()
-		internal.AssertContainsAttribute(t, attributes, "pid")
-		internal.AssertContainsAttribute(t, attributes, "pname")
-		internal.AssertContainsAttribute(t, attributes, "bcwd")
+	internal.AssertSumMetricHasAttributeValue(t, cpuTimeMetric, 0, "state",
+		pcommon.NewValueStr(metadata.AttributeStateUser.String()))
+	internal.AssertSumMetricHasAttributeValue(t, cpuTimeMetric, 1, "state",
+		pcommon.NewValueStr(metadata.AttributeStateSystem.String()))
+	if runtime.GOOS == "linux" {
+		internal.AssertSumMetricHasAttributeValue(t, cpuTimeMetric, 2, "state",
+			pcommon.NewValueStr(metadata.AttributeStateWait.String()))
 	}
-	// internal.AssertSumMetricHasAttributeValue(t, cpuTimeMetric, 0, "state",
-	// 	pcommon.NewValueStr(metadata.AttributeStateUser.String()))
-	// internal.AssertSumMetricHasAttributeValue(t, cpuTimeMetric, 1, "state",
-	// 	pcommon.NewValueStr(metadata.AttributeStateSystem.String()))
-	// if runtime.GOOS == "linux" {
-	// 	internal.AssertSumMetricHasAttributeValue(t, cpuTimeMetric, 2, "state",
-	// 		pcommon.NewValueStr(metadata.AttributeStateWait.String()))
-	// }
 }
 
 func assertCPUUtilizationMetricValid(t *testing.T, resourceMetrics pmetric.ResourceMetricsSlice, startTime pcommon.Timestamp) {
