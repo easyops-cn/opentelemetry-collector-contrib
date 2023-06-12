@@ -321,7 +321,7 @@ func (s *scraper) scrapeAndAppendMemoryUsageMetrics(now pcommon.Timestamp, md *p
 	pid, pname, cwd := md.pid, md.executable.name, md.executable.cwd
 	s.mb.RecordProcessMemoryUsageDataPoint(now, int64(mem.RSS))
 	s.mb.RecordProcessMemoryVirtualDataPoint(now, int64(mem.VMS))
-	s.mb.RecordProcessMemoryPhysicalDataPoint(now, int64(mem.VMS), int64(pid), pname, cwd)
+	s.mb.RecordProcessMemoryPhysicalDataPoint(now, int64(mem.RSS), int64(pid), pname, cwd)
 	return nil
 }
 
