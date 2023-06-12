@@ -243,7 +243,12 @@ func (s *scraper) getProcessMetadata() ([]*processMetadata, error) {
 			// set the start time to now to avoid including this when a scrape_process_delay is set
 			createTime = time.Now().UnixMilli()
 		}
-		if s.scrapeProcessDelay.Milliseconds() > (time.Now().UnixMilli() - createTime) {
+		upDuration := time.Now().UnixMilli() - createTime
+		// 兼容优维自家服务器奇怪现象，进程创建时间居然在未来...
+		if upDuration < 0 {
+			upDuration = s.scrapeProcessDelay.Milliseconds()
+		}
+		if s.scrapeProcessDelay.Milliseconds() > upDuration {
 			continue
 		}
 
