@@ -59,10 +59,11 @@ func (s *scraper) scrape(_ context.Context) (pmetric.Metrics, error) {
 		s.recordCPUTimeStateDataPoints(now, cpuTime)
 	}
 
-	err = s.ucal.CalculateAndRecord(now, cpuTimes, s.recordCPUUtilization)
-	if err != nil {
-		return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
-	}
+	// 虚拟机环境下cpu会动态变化，导致这里报错没有CPU指标
+	// err = s.ucal.CalculateAndRecord(now, cpuTimes, s.recordCPUUtilization)
+	// if err != nil {
+	// 	return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
+	// }
 
 	return s.mb.Emit(), nil
 }
