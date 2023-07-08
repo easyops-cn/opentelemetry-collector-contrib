@@ -15,6 +15,8 @@ all_set:
       enabled: true
     process.memory.physical:
       enabled: true
+    process.handles:
+      enabled: true
     process.memory.usage:
       enabled: true
     process.memory.utilization:
@@ -61,6 +63,8 @@ none_set:
     process.disk.operations:
       enabled: false
     process.memory.physical:
+      enabled: false
+    process.handles:
       enabled: false
     process.memory.usage:
       enabled: false
