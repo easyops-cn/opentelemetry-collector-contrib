@@ -16,7 +16,7 @@ metrics:
 
 ### process.all.cpu.time
 
-Total CPU seconds contains different states.
+Total user and system CPU time spent in seconds of per-process.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |

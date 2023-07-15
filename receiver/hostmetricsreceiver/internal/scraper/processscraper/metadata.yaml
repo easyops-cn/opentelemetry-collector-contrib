@@ -92,7 +92,7 @@ attributes:
 metrics:
   process.all.cpu.time:
     enabled: true
-    description: Total CPU seconds contains different states.
+    description: Total user and system CPU time spent in seconds of per-process.
     unit: s
     sum:
       value_type: double

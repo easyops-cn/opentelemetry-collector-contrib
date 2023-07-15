@@ -318,14 +318,11 @@ func (s *scraper) scrapeAndAppendCPUTimeMetric(now pcommon.Timestamp, md *proces
 }
 
 func (s *scraper) recordAllCPUTimeMetric(now pcommon.Timestamp, cpuTime *cpu.TimesStat, pid int64, pname string, cwd string) {
-	s.mb.RecordProcessAllCPUTimeDataPoint(now, getCPUTimeTotal(cpuTime), pid, pname, cwd)
+	s.mb.RecordProcessAllCPUTimeDataPoint(now, calculateCPUTime(cpuTime), pid, pname, cwd)
 }
 
-func getCPUTimeTotal(c *cpu.TimesStat) float64 {
-	total := c.User + c.System + c.Idle + c.Nice + c.Iowait + c.Irq +
-		c.Softirq + c.Steal + c.Guest + c.GuestNice
-
-	return total
+func calculateCPUTime(c *cpu.TimesStat) float64 {
+	return c.User + c.System
 }
 
 func (s *scraper) scrapeAndAppendMemoryUsageMetrics(now pcommon.Timestamp, md *processMetadata) error {
