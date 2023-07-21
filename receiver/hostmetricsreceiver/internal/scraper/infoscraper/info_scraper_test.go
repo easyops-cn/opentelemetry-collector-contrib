@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/infoscraper/internal/metadata"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/receiver"
 	"go.opentelemetry.io/collector/receiver/receivertest"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/infoscraper/internal/metadata"
 )
 
 func Test_newInfoScraper(t *testing.T) {
@@ -34,7 +34,6 @@ func Test_newInfoScraper(t *testing.T) {
 				now:      time.Now,
 				hostname: os.Hostname,
 				cpuNum:   runtime.NumCPU,
-				org:      org,
 				bootTime: host.BootTime,
 			},
 		},
@@ -135,9 +134,10 @@ func Test_scraper_scrape(t *testing.T) {
 			name: "success",
 			s: &scraper{
 				settings: receivertest.NewNopCreateSettings(),
-				now:    time.Now,
+				now:      time.Now,
 				config: &Config{
 					MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig(),
+					Org:                  "8888",
 				},
 				bootTime: func() (uint64, error) {
 					return 1, nil
@@ -146,7 +146,7 @@ func Test_scraper_scrape(t *testing.T) {
 					return "", nil
 				},
 				cpuNum: runtime.NumCPU,
-				org:    org,
+				system: getSystemInfo,
 			},
 		},
 	}
@@ -160,22 +160,6 @@ func Test_scraper_scrape(t *testing.T) {
 			}
 			if !tt.wantErr {
 				assert.Equal(t, 1, got.MetricCount())
-			}
-		})
-	}
-}
-
-func Test_org(t *testing.T) {
-	tests := []struct {
-		name string
-		want string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := org(); got != tt.want {
-				t.Errorf("org() = %v, want %v", got, tt.want)
 			}
 		})
 	}

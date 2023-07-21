@@ -56,7 +56,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordInfoNowDataPoint(ts, 1, "attr-val", "attr-val", 1)
+			mb.RecordInfoNowDataPoint(ts, 1, "attr-val", "attr-val", 1, "attr-val", "attr-val", "attr-val")
 
 			metrics := mb.Emit()
 
@@ -106,6 +106,15 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok = dp.Attributes().Get("cpu.num")
 					assert.True(t, ok)
 					assert.EqualValues(t, 1, attrVal.Int())
+					attrVal, ok = dp.Attributes().Get("os.distribution")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("os.arch")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("os.version")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
 				}
 			}
 		})

@@ -1,5 +1,7 @@
 type: hostmetricsreceiver/info
 
+parent: hostmetrics
+
 sem_conv_version: 1.9.0
 
 attributes:
@@ -12,6 +14,15 @@ attributes:
   cpu.num:  
     description: cpu num.
     type: int
+  os.distribution:
+    description: os distribution.
+    type: string
+  os.arch:
+    description: os arch.
+    type: string
+  os.version:
+    description: os version.
+    type: string    
 
 metrics:
   info.now:
@@ -22,4 +33,4 @@ metrics:
       value_type: int
       aggregation: cumulative
       monotonic: false
-    attributes: [org, hostname, cpu.num]
+    attributes: [org, hostname, cpu.num, os.distribution, os.arch, os.version]

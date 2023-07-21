@@ -29,7 +29,7 @@ func (m *metricInfoNow) init() {
 	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricInfoNow) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, orgAttributeValue string, hostnameAttributeValue string, cpuNumAttributeValue int64) {
+func (m *metricInfoNow) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, orgAttributeValue string, hostnameAttributeValue string, cpuNumAttributeValue int64, osDistributionAttributeValue string, osArchAttributeValue string, osVersionAttributeValue string) {
 	if !m.config.Enabled {
 		return
 	}
@@ -40,6 +40,9 @@ func (m *metricInfoNow) recordDataPoint(start pcommon.Timestamp, ts pcommon.Time
 	dp.Attributes().PutStr("org", orgAttributeValue)
 	dp.Attributes().PutStr("hostname", hostnameAttributeValue)
 	dp.Attributes().PutInt("cpu.num", cpuNumAttributeValue)
+	dp.Attributes().PutStr("os.distribution", osDistributionAttributeValue)
+	dp.Attributes().PutStr("os.arch", osArchAttributeValue)
+	dp.Attributes().PutStr("os.version", osVersionAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
@@ -169,8 +172,8 @@ func (mb *MetricsBuilder) Emit(rmo ...ResourceMetricsOption) pmetric.Metrics {
 }
 
 // RecordInfoNowDataPoint adds a data point to info.now metric.
-func (mb *MetricsBuilder) RecordInfoNowDataPoint(ts pcommon.Timestamp, val int64, orgAttributeValue string, hostnameAttributeValue string, cpuNumAttributeValue int64) {
-	mb.metricInfoNow.recordDataPoint(mb.startTime, ts, val, orgAttributeValue, hostnameAttributeValue, cpuNumAttributeValue)
+func (mb *MetricsBuilder) RecordInfoNowDataPoint(ts pcommon.Timestamp, val int64, orgAttributeValue string, hostnameAttributeValue string, cpuNumAttributeValue int64, osDistributionAttributeValue string, osArchAttributeValue string, osVersionAttributeValue string) {
+	mb.metricInfoNow.recordDataPoint(mb.startTime, ts, val, orgAttributeValue, hostnameAttributeValue, cpuNumAttributeValue, osDistributionAttributeValue, osArchAttributeValue, osVersionAttributeValue)
 }
 
 // Reset resets metrics builder to its initial state. It should be used when external metrics source is restarted,

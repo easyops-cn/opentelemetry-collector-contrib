@@ -12,4 +12,6 @@ import (
 type Config struct {
 	metadata.MetricsBuilderConfig `mapstructure:",squash"`
 	internal.ScraperConfig
+
+	Org string `mapstructure:"org"`
 }
