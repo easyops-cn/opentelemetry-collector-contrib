@@ -28,7 +28,7 @@ type scraper struct {
 	hostname func() (name string, err error)
 	now      func() time.Time
 	cpuNum   func() int
-	org      func() string
+	system   func() (System, error)
 	// for mocking
 	bootTime func() (uint64, error)
 }
@@ -41,8 +41,7 @@ func newInfoScraper(_ context.Context, settings receiver.CreateSettings, cfg *Co
 		now:      time.Now,
 		hostname: os.Hostname,
 		cpuNum:   runtime.NumCPU,
-		org:      org,
-
+		system:   getSystemInfo,
 		bootTime: host.BootTime,
 	}
 }
@@ -70,16 +69,21 @@ func (s *scraper) scrape(_ context.Context) (pmetric.Metrics, error) {
 	if err != nil {
 		return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
 	}
+
+	sysInfo, err := s.system()
+	if err != nil {
+		return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
+	}
+
 	s.mb.RecordInfoNowDataPoint(
 		now, now.AsTime().Unix(),
-		org(),
+		s.config.Org,
 		hostname,
 		int64(s.cpuNum()),
+		sysInfo.Distribution,
+		sysInfo.Arch,
+		sysInfo.Version,
 	)
 
 	return s.mb.Emit(), nil
-}
-
-func org() string {
-	return os.Getenv("EASY_ENV_COMMON_ORG")
 }
