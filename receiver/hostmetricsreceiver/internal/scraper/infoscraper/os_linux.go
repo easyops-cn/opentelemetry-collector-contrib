@@ -106,9 +106,11 @@ func _getSystemInfo() (System, error) {
 	for _, line := range lines {
 		if strings.HasPrefix(line, "NAME=") {
 			distribution = strings.TrimPrefix(line, "NAME=")
+			distribution = strings.Trim(distribution, "\"'")
 		}
 		if strings.HasPrefix(line, "VERSION_ID=") {
 			version = strings.TrimPrefix(line, "VERSION_ID=")
+			version = strings.Trim(version, "\"'")
 		}
 	}
 
