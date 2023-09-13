@@ -164,3 +164,8 @@ func Test_scraper_scrape(t *testing.T) {
 		})
 	}
 }
+
+func Test_numCPU(t *testing.T) {
+	t.Logf("cpu num: %d", numCPU())
+	assert.True(t, numCPU() > 0)
+}

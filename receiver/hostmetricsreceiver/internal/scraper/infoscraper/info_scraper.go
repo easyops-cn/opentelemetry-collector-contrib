@@ -4,9 +4,9 @@ package infoscraper // import "github.com/open-telemetry/opentelemetry-collector
 import (
 	"context"
 	"os"
-	"runtime"
 	"time"
 
+	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/host"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -40,7 +40,7 @@ func newInfoScraper(_ context.Context, settings receiver.CreateSettings, cfg *Co
 
 		now:      time.Now,
 		hostname: os.Hostname,
-		cpuNum:   runtime.NumCPU,
+		cpuNum:   numCPU,
 		system:   getSystemInfo,
 		bootTime: host.BootTime,
 	}
@@ -86,4 +86,9 @@ func (s *scraper) scrape(_ context.Context) (pmetric.Metrics, error) {
 	)
 
 	return s.mb.Emit(), nil
+}
+
+func numCPU() int {
+	num, _ := cpu.Counts(true)
+	return num
 }
