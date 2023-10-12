@@ -29,6 +29,8 @@ all_set:
       enabled: true
     process.signals_pending:
       enabled: true
+    process.start.time:
+      enabled: true
     process.threads:
       enabled: true
   resource_attributes:
@@ -77,6 +79,8 @@ none_set:
     process.paging.faults:
       enabled: false
     process.signals_pending:
+      enabled: false
+    process.start.time:
       enabled: false
     process.threads:
       enabled: false

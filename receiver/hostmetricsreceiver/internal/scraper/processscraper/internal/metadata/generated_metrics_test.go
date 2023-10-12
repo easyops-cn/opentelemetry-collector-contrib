@@ -103,6 +103,9 @@ func TestMetricsBuilder(t *testing.T) {
 			mb.RecordProcessSignalsPendingDataPoint(ts, 1)
 
 			allMetricsCount++
+			mb.RecordProcessStartTimeDataPoint(ts, 1)
+
+			allMetricsCount++
 			mb.RecordProcessThreadsDataPoint(ts, 1)
 
 			metrics := mb.Emit(WithProcessCommand("attr-val"), WithProcessCommandLine("attr-val"), WithProcessExecutableCwd("attr-val"), WithProcessExecutableName("attr-val"), WithProcessExecutablePath("attr-val"), WithProcessOwner("attr-val"), WithProcessParentPid(1), WithProcessPid(1))
@@ -414,6 +417,20 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
+				case "process.start.time":
+					assert.False(t, validatedMetrics["process.start.time"], "Found a duplicate in the metrics slice: process.start.time")
+					validatedMetrics["process.start.time"] = true
+					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
+					assert.Equal(t, "Start time of the process since unix epoch in seconds.", ms.At(i).Description())
+					assert.Equal(t, "s", ms.At(i).Unit())
+					assert.Equal(t, true, ms.At(i).Sum().IsMonotonic())
+					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
+					dp := ms.At(i).Sum().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.Equal(t, float64(1), dp.DoubleValue())
 				case "process.threads":
 					assert.False(t, validatedMetrics["process.threads"], "Found a duplicate in the metrics slice: process.threads")
 					validatedMetrics["process.threads"] = true

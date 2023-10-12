@@ -850,6 +850,57 @@ func newMetricProcessSignalsPending(cfg MetricConfig) metricProcessSignalsPendin
 	return m
 }
 
+type metricProcessStartTime struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills process.start.time metric with initial data.
+func (m *metricProcessStartTime) init() {
+	m.data.SetName("process.start.time")
+	m.data.SetDescription("Start time of the process since unix epoch in seconds.")
+	m.data.SetUnit("s")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(true)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricProcessStartTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricProcessStartTime) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricProcessStartTime) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricProcessStartTime(cfg MetricConfig) metricProcessStartTime {
+	m := metricProcessStartTime{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
 type metricProcessThreads struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	config   MetricConfig   // metric config provided by user.
@@ -924,6 +975,7 @@ type MetricsBuilder struct {
 	metricProcessOpenFileDescriptors metricProcessOpenFileDescriptors
 	metricProcessPagingFaults        metricProcessPagingFaults
 	metricProcessSignalsPending      metricProcessSignalsPending
+	metricProcessStartTime           metricProcessStartTime
 	metricProcessThreads             metricProcessThreads
 }
 
@@ -957,6 +1009,7 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings receiver.CreateSetting
 		metricProcessOpenFileDescriptors: newMetricProcessOpenFileDescriptors(mbc.Metrics.ProcessOpenFileDescriptors),
 		metricProcessPagingFaults:        newMetricProcessPagingFaults(mbc.Metrics.ProcessPagingFaults),
 		metricProcessSignalsPending:      newMetricProcessSignalsPending(mbc.Metrics.ProcessSignalsPending),
+		metricProcessStartTime:           newMetricProcessStartTime(mbc.Metrics.ProcessStartTime),
 		metricProcessThreads:             newMetricProcessThreads(mbc.Metrics.ProcessThreads),
 	}
 	for _, op := range options {
@@ -1097,6 +1150,7 @@ func (mb *MetricsBuilder) EmitForResource(rmo ...ResourceMetricsOption) {
 	mb.metricProcessOpenFileDescriptors.emit(ils.Metrics())
 	mb.metricProcessPagingFaults.emit(ils.Metrics())
 	mb.metricProcessSignalsPending.emit(ils.Metrics())
+	mb.metricProcessStartTime.emit(ils.Metrics())
 	mb.metricProcessThreads.emit(ils.Metrics())
 
 	for _, op := range rmo {
@@ -1186,6 +1240,11 @@ func (mb *MetricsBuilder) RecordProcessPagingFaultsDataPoint(ts pcommon.Timestam
 // RecordProcessSignalsPendingDataPoint adds a data point to process.signals_pending metric.
 func (mb *MetricsBuilder) RecordProcessSignalsPendingDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricProcessSignalsPending.recordDataPoint(mb.startTime, ts, val)
+}
+
+// RecordProcessStartTimeDataPoint adds a data point to process.start.time metric.
+func (mb *MetricsBuilder) RecordProcessStartTimeDataPoint(ts pcommon.Timestamp, val float64) {
+	mb.metricProcessStartTime.recordDataPoint(mb.startTime, ts, val)
 }
 
 // RecordProcessThreadsDataPoint adds a data point to process.threads metric.

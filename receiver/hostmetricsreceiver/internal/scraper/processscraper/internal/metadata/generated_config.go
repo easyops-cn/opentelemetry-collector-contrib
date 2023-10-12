@@ -39,6 +39,7 @@ type MetricsConfig struct {
 	ProcessOpenFileDescriptors MetricConfig `mapstructure:"process.open_file_descriptors"`
 	ProcessPagingFaults        MetricConfig `mapstructure:"process.paging.faults"`
 	ProcessSignalsPending      MetricConfig `mapstructure:"process.signals_pending"`
+	ProcessStartTime           MetricConfig `mapstructure:"process.start.time"`
 	ProcessThreads             MetricConfig `mapstructure:"process.threads"`
 }
 
@@ -84,6 +85,9 @@ func DefaultMetricsConfig() MetricsConfig {
 			Enabled: false,
 		},
 		ProcessSignalsPending: MetricConfig{
+			Enabled: false,
+		},
+		ProcessStartTime: MetricConfig{
 			Enabled: false,
 		},
 		ProcessThreads: MetricConfig{
