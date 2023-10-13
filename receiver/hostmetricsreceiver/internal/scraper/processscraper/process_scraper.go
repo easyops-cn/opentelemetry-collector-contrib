@@ -168,6 +168,8 @@ func (s *scraper) scrape(_ context.Context) (pmetric.Metrics, error) {
 			errs.AddPartial(signalMetricsLen, fmt.Errorf("error reading pending signals for process %q (pid %v): %w", md.executable.name, md.pid, err))
 		}
 
+		s.scrapeAndAppendStartTimeMetric(now, md.createTime)
+
 		options := append(md.resourceOptions(), metadata.WithStartTimeOverride(pcommon.Timestamp(md.createTime*1e6)))
 		s.mb.EmitForResource(options...)
 	}
@@ -484,4 +486,12 @@ func (s *scraper) scrapeAndAppendSignalsPendingMetric(now pcommon.Timestamp, han
 	}
 
 	return nil
+}
+
+func (s *scraper) scrapeAndAppendStartTimeMetric(now pcommon.Timestamp, ctime int64) {
+	if !s.config.MetricsBuilderConfig.Metrics.ProcessStartTime.Enabled {
+		return
+	}
+
+	s.mb.RecordProcessStartTimeDataPoint(now, float64(ctime))
 }

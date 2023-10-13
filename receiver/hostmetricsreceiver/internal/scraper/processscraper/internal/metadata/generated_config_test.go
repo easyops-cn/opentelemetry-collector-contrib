@@ -40,6 +40,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 					ProcessOpenFileDescriptors: MetricConfig{Enabled: true},
 					ProcessPagingFaults:        MetricConfig{Enabled: true},
 					ProcessSignalsPending:      MetricConfig{Enabled: true},
+					ProcessStartTime:           MetricConfig{Enabled: true},
 					ProcessThreads:             MetricConfig{Enabled: true},
 				},
 				ResourceAttributes: ResourceAttributesConfig{
@@ -72,6 +73,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 					ProcessOpenFileDescriptors: MetricConfig{Enabled: false},
 					ProcessPagingFaults:        MetricConfig{Enabled: false},
 					ProcessSignalsPending:      MetricConfig{Enabled: false},
+					ProcessStartTime:           MetricConfig{Enabled: false},
 					ProcessThreads:             MetricConfig{Enabled: false},
 				},
 				ResourceAttributes: ResourceAttributesConfig{

@@ -236,3 +236,12 @@ metrics:
       aggregation: cumulative
       monotonic: true
     attributes: [direction]
+
+  process.start.time:
+    enabled: false
+    description: Start time of the process since unix epoch in seconds.
+    unit: s
+    sum:
+      value_type: double
+      aggregation: cumulative
+      monotonic: true  
