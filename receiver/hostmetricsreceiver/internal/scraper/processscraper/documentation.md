@@ -198,14 +198,6 @@ This metric is only available on Linux.
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 | {signals} | Sum | Int | Cumulative | false |
 
-### process.start.time
-
-Start time of the process since unix epoch in seconds.
-
-| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
-| ---- | ----------- | ---------- | ----------------------- | --------- |
-| s | Sum | Double | Cumulative | true |
-
 ### process.threads
 
 Process threads count.
